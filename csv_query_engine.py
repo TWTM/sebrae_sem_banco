@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def load_csv_data(folder_path='data'):
+def load_csv_data(folder_path='dados'):
     """
     Scans a folder for .csv files and loads them into a dictionary of Pandas DataFrames.
     The dictionary keys are the filenames without the .csv extension, which will
