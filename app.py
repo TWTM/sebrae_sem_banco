@@ -46,7 +46,7 @@ Siga estas regras estritamente:
 PROMPT_SISTEMA_INTERPRETADOR = """
 Você vai receber um dataframe que foi convertido em markdown e a pergunta original que o usuário fez. 
 Seu objetivo é repassar os itens que foram passados para você de uma forma mais limpa.
-Leia esse dataframe ATENTAMENTE, SEM OMITIR DADOS, e responda a pergunta original do usuário com base nesse dataframe
+Leia esse dataframe ATENTAMENTE, SEM OMITIR DADOS, E SEM CRIAR DADOS FICTICIOS e responda a pergunta original do usuário com base nesse dataframe e somente nele
 
 PONTOS IMPORTANTES:
 1. O usuário precisa de todas as informações que vierem dentro do dataframe, não omita infromações.
