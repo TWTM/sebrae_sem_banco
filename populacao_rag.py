@@ -44,25 +44,38 @@ def criar_documentos_de_conhecimento():
     Nome da Tabela: nx_org_group_classified_v2
     Descrição: Esta tabela consolida informações macro de todos os formulários e suas classificações organizacionais.
 
-    Colunas:
-    - forms_assessment_id (id): Chave primária.
-    - forms_status (status): Status da avaliação da atividade.
-    - forms_template_name (tipo formulario): Tipo de avaliação, como ROPA ou RAT.
-    - forms_uf (uf): Unidade do Sebrae ('NA' para Nacional).
-    - forms_org_grupo_name (sg_departamento): Sigla do Departamento.
-    - hybrid_category (cadeia valor): Classificação de Cadeia de Valor.
-    - assessment_risk_level_name (risco_residual): Risco Residual após tratamento dos dados.
-    - inherent_risk_level_name (risco inerente): Risco inerente atribuído após preenchimento.
-    - forms_create_dt (data criacao): Data de Criação do formulário.
-    - forms_updated_dt (data atualizacao): Data de atualização do formulário.
-    - last_updated (data_ultima_atualizacao): Data da última atualização.
-    - submitted_on (data submissao): Data de submissão.
-    - end_date (data fim): Data fim da atividade.
-    - worked_days (dias trabalho): Diferença em dias entre end_date e submitted_on.
-    - risco_residual_numerico: Risco residual em escala numérica.
-    - risco_inerente_numerico: Risco inerente em escala numérica.
-    - primary_record_number (nm_inventario): Número do inventário de dados.
-    - primary_record_name (nome inventario): Nome do inventário de dados.
+    forms_assessment_id (id): chave primária e compoem concatenado com informações uma url de acesso ao One Trust 
+    forms_name (nome avaliação): Nome da Avaliação de Tratamento de Dados. 
+    forms_status (status): Status daa Avaliação de Atividade de Dados 
+    forms_template_name (tipo avaliacao): Tipo de Avaliação se referea versão macro que pode ser classificada também como ROPA ou RAT 
+    forms_uf (uf): Unidade do Sebrae referente, NA se refere a Unidade Nacional do Sebrae 
+    forms_org_grupo_name (sg_unidade): Sigla do Unidade Organizacional 
+    hybrid_category (cadeia valor): Classificação de Cadeia de Valor 
+    assessment_risk_level_name (risco_residual): Risco Residual pode ser classificados depois do tratamento de dados realizado ou não 
+    inherent_risk_level_name (risco_inerente): Risco Inerente, risco atribuido depois da realização do preenchimento do usuário. 
+    forms_create_dt (data criacao): Data de Criação do Avaliação de Atividade de Tratamento de Dados 
+    forms_updated_dt (data atualizacao): Data de atualização do Avaliação de Atividade de Tratamento de Dados 
+    last_updated (data ultima atualizacao): Data da Última atualização do avaliação de Atividade de Tratamento de Dados 
+    submitted_on (data submissao): Data de Submissão da atividade de Tratamento de dados 
+    completed_on (data_conclusao): Data de conclusão da Atividade de Tratamento de Dados 
+    deadline (data_prazo): Data de prazo de conclusão do Avaliaçãode Atividades de Tratamento de Dados,campo não utilizado pelo Sebrae 
+    end_date_year (ano fim): Métrica gerada conforme o Status, se a data de referência for COMPLETED ele tem como data referência completed_on se o status for UNDER_REVIEW a data de refência é last_updated trazendo assim o ano de referencia de data selecionada 
+    end_date_month (mes fim): Métrica gerada conforme o Status, se a data de referência for COMPLETED ele tem como data referência completed_on se o status for UNDER_REVIEW a data de refência é last_updated trazendo assim o ano de referencia de data selecionada 
+    end_date_day (dia fim): Métrica gerada conforme o Status, se a data de referência for COMPLETED ele tem como data referência completed_on se o status for UNDER_REVIEW a data de refência é last_updated trazendo assim o ano de referencia de data selecionada 
+    end_date (data fim): Métrica gerada conforme o Status, se a data de referência for COMPLETED ele tem como data referência completed_on se o status for UNDER_REVIEW a data de refência é last_updated trazendo assim o ano de referencia de data selecionada 
+    worked_days (dias trabalho): calculo em dias da diferença entre(end_date - submitted_on) 
+    risco_residual_numerico (risco residual numerico): tranformação da assessment risk level name em dado numérico diante da variável nominal ordinário é transformado em escala de 1 de nulas e escala de grandeza. Com objetivo de entender concentração de risco diante de medidas de disperção, posição e assimetria e curtose. 
+    risco_inerente_numerico (risco inerente numerico): tranformação da risco_inerente_numerico em dado numérico diante da variável nominal ordinário é transformado em escala de 1 de nulas e escala de grandeza. Com objetivo de entender concentração de risco diante de medidas de disperção, posição e assimetria e curtose. 
+    primary_record_number (nm inventario): número do inventário de dados relacionado à atividade de tratamento de dados 
+    primary_record_name (nome_inventario): nome do invetário de dados relacionado à atividade de tratamento de dados 
+    forms_number (numero atividade): número da atividade de tratamento de dados 
+    inventory_processing_activities_id (): id do inventário é se relacionada de maneira aglutinas todas as avaliação de tratamento de dados, testes de balanceamento, relatórios de impacto a proteção de dados, análises do DPO, sobre um respectiva atividade, que pode ser recorrente ou não. Exemplo: Folha de Pagamento do Sebrae/PR, formulário para capção de dados de ujm evento específico. 
+    inventory_processing_activities_name (): Nome do inventário é se relacionada de maneira aglutinas todas as avaliação de tratamento de dados, testes de balanceamento, relatórios de impacto a proteção de dados, análises do DPO, sobre um respectiva atividade, que pode ser recorrente ou não. Exemplo: Folha de Pagamento do Sebrae/PR, formulário para capção de dados de ujm evento específico. 
+    flag_ropa_rat (): Classifica os forms_template_name por versões, ROPA é uma versão antiga já descontinuada e RAT éa versão mais atual das Avaliações de Tratamento de Dados. 
+    mitigacao_risco (mitigacao_risco): Descreve o comportamento do risco, comparando o risco inerente (inherent_risk_level_name) e o risco residual (assessment_risk_level_name) com isso é possível identificar a mitigação ou o aumento do risco diante da variável stage_name="monitoramento", somente neste estágio é feito o tratamento do risco. O risco inerente é identificado no início do processo e o risco residual é definido na fase final. Só podendo afirmar sobre mitigação ou aumento do risco diante do estágio de monitoramento. 
+    tratamento_risco (comportamento_risco): comparação simples entre o risco inerente () e o risco residual () 
+    stage_name (estagio_nome): Estágio do Tratamento do Risco, somente no estágio de Monitoramento que é realizado o tratamento do risco 
+    description_org (descricao_unidade): Descrição da Unidade Organizacional
     """
 
     documentos = [
