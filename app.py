@@ -54,7 +54,7 @@ PONTOS IMPORTANTES:
 3. Responda SEMPRE em português do Brasil
 4. Tome cuidado para não deixar passar informações importantes que estarão no prompt que você receber
 """
-
+# comentario
 # --- Caching ---
 @st.cache_resource
 def inicializar_llm():
