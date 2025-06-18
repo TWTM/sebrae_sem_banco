@@ -90,7 +90,7 @@ def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
 @st.cache_data
 def carregar_dados_csv():
     # ... (this function remains unchanged)
-    dataframes = load_csv_data(folder_path='sebrae_sem_banco\dados')
+    dataframes = load_csv_data(folder_path='dados')
     if not dataframes or len(dataframes) == 0:
         st.error("Nenhum arquivo CSV encontrado na pasta 'data'. Por favor, adicione 'ot_consolidada.csv' e 'nx_org_group_classified_v2.csv'.")
         return None
