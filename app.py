@@ -20,7 +20,7 @@ from populacao_rag import criar_documentos_de_conhecimento, criar_base_de_conhec
 
 # --- App Configuration ---
 st.set_page_config(
-    page_title="ChatBot do DPO - faça perguntas com base nos dados do One Trust - versão BETA",
+    page_title="SEBRAE - Texto para SQL",
     page_icon="🤖",
     layout="wide"
 )
@@ -46,7 +46,7 @@ Siga estas regras estritamente:
 PROMPT_SISTEMA_INTERPRETADOR = """
 Você vai receber um dataframe que foi convertido em markdown e a pergunta original que o usuário fez. 
 Seu objetivo é repassar os itens que foram passados para você de uma forma mais limpa.
-Leia esse dataframe ATENTAMENTE, SEM OMITIR DADOS, E SEM CRIAR DADOS FICTICIOS e responda a pergunta original do usuário com base nesse dataframe e somente nele
+Leia esse dataframe ATENTAMENTE, SEM OMITIR DADOS, e responda a pergunta original do usuário com base nesse dataframe
 
 PONTOS IMPORTANTES:
 1. O usuário precisa de todas as informações que vierem dentro do dataframe, não omita infromações.
@@ -54,7 +54,7 @@ PONTOS IMPORTANTES:
 3. Responda SEMPRE em português do Brasil
 4. Tome cuidado para não deixar passar informações importantes que estarão no prompt que você receber
 """
-# comentario
+
 # --- Caching ---
 @st.cache_resource
 def inicializar_llm():
@@ -90,19 +90,19 @@ def carregar_dados_csv():
     # com base na localização do script atual (app.py)
     script_dir = os.path.dirname(__file__)
     folder_path = os.path.join(script_dir, "dados")
-    
+
     dataframes, message = load_csv_data(folder_path)
-    
+
     if dataframes is None:
         st.error(message) # Exibe a mensagem de erro detalhada do load_csv_data
         return None
-    
+
     st.success(message) # Exibe a mensagem de sucesso
     return dataframes
 
 # --- Main App Logic ---
 def main():
-    st.title("ChatBot do DPO - faça perguntas com base nos dados do One Trust - versão BETA")
+    st.title("🤖 ChatBot do DPO - faça perguntas com base nos dados do One Trust - versão BETA")
     st.markdown("Faça uma pergunta em português sobre os dados dos arquivos CSV e o sistema irá gerar e executar uma consulta SQL para encontrar a resposta.")
 
     DB_DIR = "base_chroma_db"
@@ -116,11 +116,11 @@ def main():
             except Exception as e:
                 st.error(f"Erro crítico ao criar a base de conhecimento RAG: {e}")
                 return
-    
+
     with st.sidebar:
         st.header("Sobre")
         st.markdown("Os dados carregados para base de conhecimento do chat, são as perguntas e respostas das Avaliações realizadas e que estão com o Status de 'Concluída' e 'Em Revisão'. Faça busca por Unidade do Sebrae, Unidade Organizacional, entre outras buscas possível. O foco do chat na versão BETA é fazer consultas básicas de quantidade de Avaliações.")
-        
+        st.markdown("A base de conhecimento (RAG) é criada automaticamente na primeira execução.")
 
     # --- Initialization ---
     llm = inicializar_llm()
@@ -138,7 +138,7 @@ def main():
 
     if st.button("Gerar Resposta", type="primary") and pergunta_usuario:
         with st.spinner("Processando sua pergunta..."):
-            
+
             # 1. Buscando Contexto (RAG)
             st.subheader("1. Buscando Contexto (RAG)")
             documentos_relevantes = retriever.invoke(pergunta_usuario)
@@ -149,10 +149,10 @@ def main():
             # 2. Gerando Consulta SQL com LLM
             st.subheader("2. Gerando Consulta SQL com LLM")
             prompt_final = f"Contexto das Tabelas:\n{contexto_rag}\n\nCom base SOMENTE no contexto acima, traduza a seguinte pergunta para SQL.\n\nPergunta do Usuário:\n{pergunta_usuario}"
-            
+
             response = llm.invoke([SystemMessage(content=PROMPT_SISTEMA), HumanMessage(content=prompt_final)])
             resposta_json_str = response.content
-            
+
             if not resposta_json_str:
                 st.error("O modelo não retornou uma resposta.")
                 return
@@ -162,7 +162,7 @@ def main():
                 resposta_obj = json.loads(clean_response)
                 sql_gerado = resposta_obj.get("query")
                 descricao = resposta_obj.get("descricao")
-                
+
                 st.code(sql_gerado, language='sql')
                 st.info(f"**Descrição:** {descricao}")
 
@@ -181,7 +181,7 @@ def main():
                 sql_gerado = sql_gerado.strip()[:-1]
 
             df_resultado, mensagem = execute_sql_on_dfs(sql_gerado, dataframes)
-            
+
             if df_resultado is not None and not df_resultado.empty:
                 st.success(mensagem)
                 st.dataframe(df_resultado)
@@ -191,7 +191,7 @@ def main():
                 with st.spinner("Gerando resposta final em linguagem natural..."):
                     dados_markdown = df_resultado.to_markdown()
                     interpretador_prompt = f"**PERGUNTA ORIGINAL DO USUÁRIO:**\n{pergunta_usuario}\n\n**DADOS DA CONSULTA:**\n{dados_markdown}\n\nCom base apenas nos dados acima, responda à pergunta original do usuário."
-                    
+
                     resposta_final_obj = llm.invoke([SystemMessage(content=PROMPT_SISTEMA_INTERPRETADOR), HumanMessage(content=interpretador_prompt)])
                     st.markdown(resposta_final_obj.content)
             else:
