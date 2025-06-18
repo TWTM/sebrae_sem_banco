@@ -20,7 +20,7 @@ from populacao_rag import criar_documentos_de_conhecimento, criar_base_de_conhec
 
 # --- App Configuration ---
 st.set_page_config(
-    page_title="Natural Language to SQL (CSV Version)",
+    page_title="ChatBot do DPO - faça perguntas com base nos dados do One Trust - versão BETA",
     page_icon="🤖",
     layout="wide"
 )
