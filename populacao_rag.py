@@ -113,7 +113,7 @@ def criar_base_de_conhecimento_rag(documentos, nome_diretorio_db="base_chroma_db
     """
     try:
         print("Inicializando o modelo de embedding...")
-        modelo_embedding = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
+        modelo_embedding = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-small")
 
         print(f"Criando e persistindo o banco de dados Chroma na pasta '{nome_diretorio_db}'...")
         # O ChromaDB cria e persiste os dados no diretório especificado de uma só vez.
