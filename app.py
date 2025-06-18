@@ -190,7 +190,10 @@ def main():
                 st.subheader("4. Interpretando os Resultados")
                 with st.spinner("Gerando resposta final em linguagem natural..."):
                     dados_markdown = df_resultado.to_markdown()
-                    interpretador_prompt = f"**PERGUNTA ORIGINAL DO USUÁRIO:**\n{pergunta_usuario}\n\n**DADOS DA CONSULTA:**\n{dados_markdown}\n\nCom base apenas nos dados acima, responda à pergunta original do usuário."
+                    interpretador_prompt = f"""**PERGUNTA ORIGINAL DO USUÁRIO:**\n{pergunta_usuario}\n\n**DADOS DA CONSULTA:**\n{dados_markdown}\n\n
+                    Com base apenas nos dados acima, responda à pergunta original do usuário.
+                    Fique atento para não deixar de listar TODOS os registros em dados da consulta.
+                    Não crie informações que não estão dentro dos dados da consulta."""
 
                     resposta_final_obj = llm.invoke([SystemMessage(content=PROMPT_SISTEMA_INTERPRETADOR), HumanMessage(content=interpretador_prompt)])
                     st.markdown(resposta_final_obj.content)
