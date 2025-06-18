@@ -71,7 +71,7 @@ def inicializar_llm():
 def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
     try:
         st.write("Inicializando a base de conhecimento ChromaDB...")
-        modelo_embedding = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
+        modelo_embedding = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-small")
         db_vetorial = Chroma(persist_directory=nome_diretorio_db, embedding_function=modelo_embedding)
         retriever = db_vetorial.as_retriever(search_kwargs={"k": 3})
         st.success("Base de conhecimento pronta.")
