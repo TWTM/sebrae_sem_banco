@@ -89,13 +89,27 @@ def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
 
 @st.cache_data
 def carregar_dados_csv():
-    # ... (this function remains unchanged)
-    dataframes = load_csv_data(folder_path='dados')
-    if not dataframes or len(dataframes) == 0:
-        st.error("Nenhum arquivo CSV encontrado na pasta 'data'. Por favor, adicione 'ot_consolidada.csv' e 'nx_org_group_classified_v2.csv'.")
+    try:
+        # Constrói o caminho absoluto para a pasta 'dados'
+        # Isso garante que o script encontre a pasta, não importa de onde você o execute.
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        folder_path = os.path.join(script_dir, 'dados')
+
+        # Passa o caminho absoluto para a função de carregamento
+        dataframes = load_csv_data(folder_path=folder_path)
+
+        # Verifica se os dataframes foram carregados
+        if not dataframes or len(dataframes) == 0:
+            # Mensagem de erro corrigida para mostrar o caminho completo que foi verificado
+            st.error(f"Nenhum arquivo CSV encontrado no diretório esperado: '{folder_path}'. Verifique se a pasta 'dados' e os arquivos CSV estão no local correto.")
+            return None
+        
+        st.success(f"Dados CSV carregados com sucesso. Tabelas disponíveis: {list(dataframes.keys())}")
+        return dataframes
+        
+    except Exception as e:
+        st.error(f"Ocorreu um erro inesperado ao carregar os arquivos CSV: {e}")
         return None
-    st.success(f"Dados CSV carregados. Tabelas disponíveis: {list(dataframes.keys())}")
-    return dataframes
 
 
 # --- Main App Logic ---
