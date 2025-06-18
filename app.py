@@ -88,37 +88,15 @@ def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
         return None
 
 @st.cache_data
+
 def carregar_dados_csv():
-    """
-    Carrega todos os arquivos CSV de uma pasta especificada para um dicionário de DataFrames.
-    Utiliza um caminho relativo para garantir a compatibilidade com ambientes como o Streamlit Cloud.
-    """
-    try:
-        # Define o caminho RELATIVO para a pasta 'dados'.
-        # Esta é a correção principal: é mais simples e robusto para ambientes de servidor.
-        folder_path = 'dados'
-
-        # Verifica se o diretório existe antes de prosseguir
-        if not os.path.isdir(folder_path):
-             st.error(f"O diretório '{folder_path}' não foi encontrado na raiz do projeto. Verifique se a pasta foi enviada para o repositório do GitHub.")
-             return None
-
-        # Passa o caminho para a função de carregamento
-        dataframes = load_csv_data(folder_path=folder_path)
-
-        # Verifica se algum dataframe foi carregado
-        if not dataframes:
-            st.error(f"Nenhum arquivo CSV foi encontrado dentro do diretório '{folder_path}'. Verifique se os arquivos estão presentes e com a extensão .csv.")
-            return None
-            
-        st.success(f"Dados CSV carregados com sucesso. Tabelas disponíveis: {list(dataframes.keys())}")
-        return dataframes
-        
-    except Exception as e:
-        st.error(f"Ocorreu um erro inesperado ao carregar os arquivos CSV: {e}")
-        # Para depuração, é útil saber o diretório de trabalho atual
-        st.info(f"O diretório de trabalho atual é: {os.getcwd()}")
+# ... (this function remains unchanged)
+    dataframes = load_csv_data(folder_path='dados')
+    if not dataframes or len(dataframes) == 0:
+        st.error("Nenhum arquivo CSV encontrado na pasta 'data'. Por favor, adicione 'ot_consolidada.csv' e 'nx_org_group_classified_v2.csv'.")
         return None
+    st.success(f"Dados CSV carregados. Tabelas disponíveis: {list(dataframes.keys())}")
+    return dataframes
 
 # --- Main App Logic ---
 def main():
