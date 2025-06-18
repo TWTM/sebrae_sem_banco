@@ -102,7 +102,7 @@ def carregar_dados_csv():
 
 # --- Main App Logic ---
 def main():
-    st.title("🤖 Tradutor de Linguagem Natural para SQL (Arquivos CSV)")
+    st.title("ChatBot do DPO - faça perguntas com base nos dados do One Trust - versão BETA")
     st.markdown("Faça uma pergunta em português sobre os dados dos arquivos CSV e o sistema irá gerar e executar uma consulta SQL para encontrar a resposta.")
 
     DB_DIR = "base_chroma_db"
@@ -119,8 +119,8 @@ def main():
     
     with st.sidebar:
         st.header("Sobre")
-        st.markdown("Esta aplicação traduz linguagem natural para SQL, executa a consulta em arquivos CSV locais e interpreta os resultados.")
-        st.markdown("A base de conhecimento (RAG) é criada automaticamente na primeira execução.")
+        st.markdown("Os dados carregados para base de conhecimento do chat, são as perguntas e respostas das Avaliações realizadas e que estão com o Status de 'Concluída' e 'Em Revisão'. Faça busca por Unidade do Sebrae, Unidade Organizacional, entre outras buscas possível. O foco do chat na versão BETA é fazer consultas básicas de quantidade de Avaliações.")
+        
 
     # --- Initialization ---
     llm = inicializar_llm()
