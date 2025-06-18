@@ -8,14 +8,13 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 import json
 import pandas as pd
-import os  # <-- Import the 'os' module
+import os
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_together import ChatTogether
 from langchain_core.messages import SystemMessage, HumanMessage
 
 # --- Import your modules ---
-# Use the modules as discussed. populacao_rag contains the static data dictionary.
 from csv_query_engine import load_csv_data, execute_sql_on_dfs
 from populacao_rag import criar_documentos_de_conhecimento, criar_base_de_conhecimento_rag
 
@@ -28,9 +27,6 @@ st.set_page_config(
 
 # --- LLM and Prompt Configuration ---
 TOGETHER_MODEL_NAME = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
-
-# --- REFINED PROMPT ---
-# Added a rule to ignore the 'Caminho' from the context, as it's irrelevant for CSVs.
 PROMPT_SISTEMA = """
 Você é um assistente especialista em traduzir perguntas em linguagem natural (português) para consultas SQL. 
 Sua única função é gerar um código SQL funcional e otimizado com base no esquema das tabelas e no contexto fornecido. 
@@ -62,7 +58,6 @@ PONTOS IMPORTANTES:
 # --- Caching ---
 @st.cache_resource
 def inicializar_llm():
-    # ... (this function remains unchanged)
     try:
         api_key = st.secrets["TOGETHER_API_KEY"]
         llm = ChatTogether(model=TOGETHER_MODEL_NAME, temperature=0.0, together_api_key=api_key)
@@ -74,7 +69,6 @@ def inicializar_llm():
 
 @st.cache_resource
 def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
-    # ... (this function remains mostly unchanged)
     try:
         st.write("Inicializando a base de conhecimento ChromaDB...")
         modelo_embedding = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large")
@@ -84,63 +78,45 @@ def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
         return retriever
     except Exception as e:
         st.error(f"Erro ao inicializar o retriever: {e}")
-        st.warning(f"Verifique se a pasta '{nome_diretorio_db}' existe. A criação automática pode ter falhado.", icon="👈")
         return None
 
 @st.cache_data
-
-
 def carregar_dados_csv():
     """
-    Carrega os arquivos CSV de forma robusta, usando um caminho absoluto
-    baseado na localização do script.
+    Localiza a pasta 'dados' de forma robusta e carrega os arquivos CSV.
     """
-    try:
-        # Diretório base onde o script app.py está localizado
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        
-        # Constrói o caminho completo e absoluto para a pasta 'dados'
-        folder_path = os.path.join(base_dir, "dados")
-
-        st.info(f"Procurando arquivos CSV no caminho: {folder_path}") # Adicionado para debug
-        
-        dataframes = load_csv_data(folder_path)
-        
-        if not dataframes or len(dataframes) == 0:
-            # CORREÇÃO: A mensagem de erro mencionava 'data' em vez de 'dados'.
-            st.error("Nenhum arquivo CSV encontrado na pasta 'dados'. Verifique se a pasta e os arquivos existem no repositório.")
-            return None
-            
-        st.success(f"Dados CSV carregados. Tabelas disponíveis: {list(dataframes.keys())}")
-        return dataframes
-        
-    except Exception as e:
-        st.error(f"Ocorreu um erro inesperado ao carregar os dados CSV: {e}")
+    # --- CORREÇÃO PRINCIPAL ---
+    # Constrói o caminho absoluto para a pasta 'dados'
+    # com base na localização do script atual (app.py)
+    script_dir = os.path.dirname(__file__)
+    folder_path = os.path.join(script_dir, "dados")
+    
+    dataframes, message = load_csv_data(folder_path)
+    
+    if dataframes is None:
+        st.error(message) # Exibe a mensagem de erro detalhada do load_csv_data
         return None
+    
+    st.success(message) # Exibe a mensagem de sucesso
+    return dataframes
 
 # --- Main App Logic ---
 def main():
     st.title("🤖 Tradutor de Linguagem Natural para SQL (Arquivos CSV)")
     st.markdown("Faça uma pergunta em português sobre os dados dos arquivos CSV e o sistema irá gerar e executar uma consulta SQL para encontrar a resposta.")
 
-    # --- NEW: Automatic RAG Population Logic ---
     DB_DIR = "base_chroma_db"
-    # Check if the vector DB directory exists. If not, create it on first run.
     if not os.path.exists(DB_DIR):
         st.info("Base de conhecimento não encontrada. Criando pela primeira vez...")
-        with st.spinner("Lendo o dicionário de dados e populando o ChromaDB. Isso pode levar um momento..."):
+        with st.spinner("Lendo o dicionário de dados e populando o ChromaDB..."):
             try:
-                # Use the hardcoded document creation function from your module
                 documentos = criar_documentos_de_conhecimento()
                 criar_base_de_conhecimento_rag(documentos, nome_diretorio_db=DB_DIR)
                 st.success("Base de conhecimento RAG criada com sucesso!")
-                # No need to rerun, the app will continue loading
             except Exception as e:
                 st.error(f"Erro crítico ao criar a base de conhecimento RAG: {e}")
-                # Stop the app if RAG creation fails
                 return
     
-    # The sidebar is now cleaner, without the button
     with st.sidebar:
         st.header("Sobre")
         st.markdown("Esta aplicação traduz linguagem natural para SQL, executa a consulta em arquivos CSV locais e interpreta os resultados.")
@@ -152,7 +128,7 @@ def main():
     dataframes = carregar_dados_csv()
 
     if not all([llm, retriever, dataframes]):
-        st.warning("O sistema não está pronto. Verifique as mensagens de erro acima e a configuração.")
+        st.warning("O sistema não está totalmente pronto. Verifique as mensagens de erro acima e a configuração.")
         return
 
     pergunta_usuario = st.text_input(
@@ -161,14 +137,16 @@ def main():
     )
 
     if st.button("Gerar Resposta", type="primary") and pergunta_usuario:
-        # The rest of the logic remains the same as the previous correct implementation...
         with st.spinner("Processando sua pergunta..."):
+            
+            # 1. Buscando Contexto (RAG)
             st.subheader("1. Buscando Contexto (RAG)")
             documentos_relevantes = retriever.invoke(pergunta_usuario)
             contexto_rag = "".join(f"---\nFonte: {doc.metadata.get('fonte', 'desconhecida')}\nConteúdo:\n{doc.page_content}\n" for doc in documentos_relevantes)
             with st.expander("Ver Contexto Encontrado"):
                 st.text(contexto_rag)
 
+            # 2. Gerando Consulta SQL com LLM
             st.subheader("2. Gerando Consulta SQL com LLM")
             prompt_final = f"Contexto das Tabelas:\n{contexto_rag}\n\nCom base SOMENTE no contexto acima, traduza a seguinte pergunta para SQL.\n\nPergunta do Usuário:\n{pergunta_usuario}"
             
@@ -180,7 +158,6 @@ def main():
                 return
 
             try:
-                # Handle cases where the response might not be perfect JSON
                 clean_response = resposta_json_str.strip().replace("```json", "").replace("```", "")
                 resposta_obj = json.loads(clean_response)
                 sql_gerado = resposta_obj.get("query")
@@ -198,6 +175,7 @@ def main():
                 st.code(resposta_json_str)
                 return
 
+            # 3. Executando Consulta nos Arquivos CSV
             st.subheader("3. Executando Consulta nos Arquivos CSV")
             if sql_gerado.strip().endswith(";"):
                 sql_gerado = sql_gerado.strip()[:-1]
@@ -205,9 +183,10 @@ def main():
             df_resultado, mensagem = execute_sql_on_dfs(sql_gerado, dataframes)
             
             if df_resultado is not None and not df_resultado.empty:
-                st.success(f"{mensagem}")
+                st.success(mensagem)
                 st.dataframe(df_resultado)
 
+                # 4. Interpretando os Resultados
                 st.subheader("4. Interpretando os Resultados")
                 with st.spinner("Gerando resposta final em linguagem natural..."):
                     dados_markdown = df_resultado.to_markdown()
@@ -216,7 +195,7 @@ def main():
                     resposta_final_obj = llm.invoke([SystemMessage(content=PROMPT_SISTEMA_INTERPRETADOR), HumanMessage(content=interpretador_prompt)])
                     st.markdown(resposta_final_obj.content)
             else:
-                st.warning(f"A consulta foi executada, mas não retornou resultados. Mensagem do sistema: {mensagem}")
+                st.warning(f"A consulta não retornou resultados. Mensagem do sistema: {mensagem}")
 
 if __name__ == "__main__":
     main()
