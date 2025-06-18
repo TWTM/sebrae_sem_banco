@@ -23,7 +23,7 @@ def load_csv_data(folder_path: str):
             table_name = os.path.splitext(filename)[0]
             file_path = os.path.join(folder_path, filename)
             try:
-                dataframes[table_name] = pd.read_csv(file_path)
+                dataframes[table_name] = pd.read_csv(file_path, sep=';')
             except Exception as e:
                 # Se um arquivo específico falhar, retornamos o erro.
                 return None, f"Erro ao carregar o arquivo {filename}: {e}"
