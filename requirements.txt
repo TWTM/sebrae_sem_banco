@@ -9,7 +9,7 @@ protobuf==3.20.3
 opentelemetry-api<1.22
 opentelemetry-sdk<1.22
 opentelemetry-exporter-otlp-proto-grpc<1.22
-pysqlite3-binary
+pysqlite3-binary==0.5.1
 trino==0.333.0
 requests==2.32.3
 PyJWT==2.10.1
