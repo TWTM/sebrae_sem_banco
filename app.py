@@ -119,7 +119,7 @@ def carregar_dados_csv():
         return None
 
 # --- Main App Logic ---
-def main():
+def main_1():
     st.title("🤖 Tradutor de Linguagem Natural para SQL (Arquivos CSV)")
     st.markdown("Faça uma pergunta em português sobre os dados dos arquivos CSV e o sistema irá gerar e executar uma consulta SQL para encontrar a resposta.")
 
@@ -217,6 +217,69 @@ def main():
                     st.markdown(resposta_final_obj.content)
             else:
                 st.warning(f"A consulta foi executada, mas não retornou resultados. Mensagem do sistema: {mensagem}")
+
+def main():
+    st.set_page_config(layout="wide")
+    st.title("🔬 Ferramenta de Diagnóstico de Arquivos do Streamlit")
+    st.info("Esta é uma verificação temporária para entender o ambiente do servidor.")
+    st.write("---")
+
+    try:
+        # 1. Diretório de Trabalho Atual
+        st.subheader("1. Diretório de Trabalho Atual (`os.getcwd`)")
+        cwd = os.getcwd()
+        st.code(cwd, language='bash')
+
+        # 2. Caminho absoluto do script app.py
+        st.subheader("2. Caminho Absoluto do Script (`os.path.abspath(__file__)`)")
+        script_path = os.path.abspath(__file__)
+        st.code(script_path, language='bash')
+
+        # 3. Diretório que contém o script
+        st.subheader("3. Diretório Base do Script (`os.path.dirname`)")
+        base_dir = os.path.dirname(script_path)
+        st.code(base_dir, language='bash')
+
+        # 4. Conteúdo do diretório base
+        st.subheader(f"4. Listando todo o conteúdo encontrado em: `{base_dir}`")
+        try:
+            base_dir_contents = os.listdir(base_dir)
+            if not base_dir_contents:
+                st.warning("O diretório base parece estar vazio.")
+            else:
+                st.code('\n'.join(sorted(base_dir_contents)), language='bash')
+        except Exception as e:
+            st.error(f"Erro ao tentar listar o conteúdo do diretório base.")
+            st.exception(e)
+
+
+        # 5. Tentando acessar e listar a pasta 'dados'
+        st.subheader("5. Verificação Específica da pasta `dados`")
+        dados_path = os.path.join(base_dir, 'dados')
+        st.write(f"Caminho completo que está sendo verificado para a pasta 'dados':")
+        st.code(dados_path, language='bash')
+        
+        st.write(f"A pasta 'dados' existe neste caminho?")
+        if os.path.exists(dados_path) and os.path.isdir(dados_path):
+            st.success("✅ Sim, a pasta 'dados' existe e é um diretório.")
+            
+            st.write("Conteúdo encontrado dentro da pasta 'dados':")
+            try:
+                dados_contents = os.listdir(dados_path)
+                if not dados_contents:
+                    st.warning("A pasta 'dados' foi encontrada, mas está vazia.")
+                else:
+                    st.code('\n'.join(sorted(dados_contents)), language='bash')
+            except Exception as e:
+                st.error("Erro ao tentar listar o conteúdo da pasta 'dados', verifique as permissões.")
+                st.exception(e)
+        else:
+            st.error("❌ Não, a pasta 'dados' NÃO foi encontrada neste caminho ou não é um diretório.")
+
+    except Exception as e:
+        st.error("Ocorreu um erro geral e inesperado durante o diagnóstico.")
+        st.exception(e)
+    
 
 if __name__ == "__main__":
     main()
