@@ -89,28 +89,36 @@ def inicializar_retriever(nome_diretorio_db="base_chroma_db"):
 
 @st.cache_data
 def carregar_dados_csv():
+    """
+    Carrega todos os arquivos CSV de uma pasta especificada para um dicionário de DataFrames.
+    Utiliza um caminho relativo para garantir a compatibilidade com ambientes como o Streamlit Cloud.
+    """
     try:
-        # Constrói o caminho absoluto para a pasta 'dados'
-        # Isso garante que o script encontre a pasta, não importa de onde você o execute.
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        folder_path = os.path.join(script_dir, 'dados')
+        # Define o caminho RELATIVO para a pasta 'dados'.
+        # Esta é a correção principal: é mais simples e robusto para ambientes de servidor.
+        folder_path = 'dados'
 
-        # Passa o caminho absoluto para a função de carregamento
+        # Verifica se o diretório existe antes de prosseguir
+        if not os.path.isdir(folder_path):
+             st.error(f"O diretório '{folder_path}' não foi encontrado na raiz do projeto. Verifique se a pasta foi enviada para o repositório do GitHub.")
+             return None
+
+        # Passa o caminho para a função de carregamento
         dataframes = load_csv_data(folder_path=folder_path)
 
-        # Verifica se os dataframes foram carregados
-        if not dataframes or len(dataframes) == 0:
-            # Mensagem de erro corrigida para mostrar o caminho completo que foi verificado
-            st.error(f"Nenhum arquivo CSV encontrado no diretório esperado: '{folder_path}'. Verifique se a pasta 'dados' e os arquivos CSV estão no local correto.")
+        # Verifica se algum dataframe foi carregado
+        if not dataframes:
+            st.error(f"Nenhum arquivo CSV foi encontrado dentro do diretório '{folder_path}'. Verifique se os arquivos estão presentes e com a extensão .csv.")
             return None
-        
+            
         st.success(f"Dados CSV carregados com sucesso. Tabelas disponíveis: {list(dataframes.keys())}")
         return dataframes
         
     except Exception as e:
         st.error(f"Ocorreu um erro inesperado ao carregar os arquivos CSV: {e}")
+        # Para depuração, é útil saber o diretório de trabalho atual
+        st.info(f"O diretório de trabalho atual é: {os.getcwd()}")
         return None
-
 
 # --- Main App Logic ---
 def main():
